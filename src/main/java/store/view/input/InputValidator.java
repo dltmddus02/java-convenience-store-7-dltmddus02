@@ -1,6 +1,5 @@
 package store.view.input;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class InputValidator {
@@ -16,10 +15,20 @@ public class InputValidator {
     }
 
     public static void validateFormat(String input) {
-        Pattern pattern = Pattern.compile("\\[([ㄱ-ㅎ가-힣a-zA-Z]+)-([0-9]+)]");
-        Matcher matcher = pattern.matcher(input);
-        if (!matcher.find()) {
+        if (!isCorrectFormat(input)) {
             throw new InputException(InputErrorMessage.INCORRECT_INPUT_FORMAT);
         }
+    }
+
+    private static boolean isCorrectFormat(String input) {
+        String productPattern = "[ㄱ-ㅎ가-힣a-zA-Z]+";
+        String numberPattern = "[0-9]+";
+
+        String singlePattern = String.format("\\[(%s)-(%s)]", productPattern, numberPattern);
+        String repeatPattern = String.format("%s(,%s)*", singlePattern, singlePattern);
+
+        Pattern correctPattern = Pattern.compile("^" + repeatPattern + "$");
+
+        return correctPattern.matcher(input).find();
     }
 }
