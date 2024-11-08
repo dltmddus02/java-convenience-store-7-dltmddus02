@@ -2,32 +2,43 @@ package store.service;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import store.domain.Product;
 import store.domain.ProductField;
 import store.domain.Promotion;
 import store.repository.ProductRepository;
+import store.view.output.OutputView;
 
 public class ProductService {
-    private static final String PRODUCT_FILE_PATH = "resources/products.md";
+    private static final String PRODUCT_FILE_PATH = "src/main/resources/products.md";
+    private static final String FILE_LOAD_ERROR = "상품 목록을 불러오는 중 오류가 발생했습니다.";
     private final ProductRepository productRepository;
 
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
-    private void loadProductsFromFile() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(PRODUCT_FILE_PATH));
+    public void loadProductsFromFile() {
+        try (BufferedReader br = new BufferedReader(new FileReader(PRODUCT_FILE_PATH))) {
+            readProductLines(br);
+            System.out.println();
+        } catch (IOException e) {
+            System.err.println(FILE_LOAD_ERROR + ": " + e.getMessage());
+        }
+    }
 
+
+    void readProductLines(BufferedReader br) throws IOException {
         br.readLine();
-
         String line;
         while ((line = br.readLine()) != null) {
             processEachProductLine(line);
         }
-        br.close();
     }
 
     private void processEachProductLine(String line) {
@@ -42,6 +53,8 @@ public class ProductService {
         int price = Integer.parseInt(values.get(ProductField.PRICE.getIndex()));
         int quantity = Integer.parseInt(values.get(ProductField.QUANTITY.getIndex()));
         String promotionType = values.get(ProductField.PROMOTION_TYPE.getIndex());
+
+        OutputView.printProductList(productName, price, quantity, promotionType);
 
         Product product = getOrCreateProduct(productName, price);
         addPromotionToProduct(product, quantity, promotionType);
@@ -59,9 +72,51 @@ public class ProductService {
     }
 
     private void saveOrUpdateProduct(Product product) {
-        if (productRepository.existsByName(product.getName())) {
-            return;
+        if (!productRepository.existsByName(product.getName())) {
+            productRepository.save(product);
         }
-        productRepository.save(product);
     }
+
+    public void updateProductStock(String productName, String promotionType, int newQuantity) {
+        try {
+            List<String> lines = readAllLines();
+            List<String> updatedLines = lines.stream()
+                    .map(line -> updateStockInLine(line, productName, promotionType, newQuantity))
+                    .toList();
+            writeUpdatedLinesToFile(updatedLines);
+        } catch (IOException e) {
+            System.err.println(FILE_LOAD_ERROR + ": " + e.getMessage());
+        }
+    }
+
+    private List<String> readAllLines() throws IOException {
+        return Files.readAllLines(Paths.get(PRODUCT_FILE_PATH));
+    }
+
+    private String updateStockInLine(String line, String productName, String promotionType, int newQuantity) {
+        String[] values = line.split(",");
+        if (isMatchingProduct(values, productName, promotionType)) {
+            return createUpdatedLine(values, newQuantity);
+        }
+        return line;
+    }
+
+    private boolean isMatchingProduct(String[] values, String productName, String promotionType) {
+        return values[ProductField.NAME.getIndex()].equals(productName) &&
+                values[ProductField.PROMOTION_TYPE.getIndex()].equals(promotionType);
+    }
+
+    private String createUpdatedLine(String[] values, int updatedQuantity) {
+        values[ProductField.QUANTITY.getIndex()] = String.valueOf(updatedQuantity);
+        return String.join(",", values);
+    }
+
+    private void writeUpdatedLinesToFile(List<String> updatedLines) throws IOException {
+        try (FileWriter writer = new FileWriter(PRODUCT_FILE_PATH)) {
+            for (String updatedLine : updatedLines) {
+                writer.write(updatedLine + System.lineSeparator());
+            }
+        }
+    }
+
 }
