@@ -9,11 +9,10 @@ public class MemoryProductRepository implements ProductRepository {
     private Map<String, Product> productCatalog = new HashMap<>();
 
     @Override
-    public Product save(Product product) {
+    public void save(Product product) {
         if (!existsByName(product.getName())) {
             productCatalog.put(product.getName(), product);
         }
-        return product;
     }
 
     @Override
