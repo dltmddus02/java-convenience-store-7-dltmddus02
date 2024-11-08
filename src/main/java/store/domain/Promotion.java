@@ -1,7 +1,7 @@
 package store.domain;
 
 public class Promotion {
-    private final int quantity;
+    private int quantity;
     private final String promotionType;
 
     public Promotion(int quantity, String promotionType) {
@@ -11,6 +11,10 @@ public class Promotion {
 
     public int getQuantity() {
         return quantity;
+    }
+
+    public void setQuantity(int newQuantity) {
+        quantity = newQuantity;
     }
 
     public String getPromotionType() {
