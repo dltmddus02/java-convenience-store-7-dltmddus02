@@ -6,7 +6,7 @@ import java.util.List;
 public class Product {
     private final String name;
     private final int price;
-    private final List<Promotion> promotions = new ArrayList<>();
+    private final List<Stock> stocks = new ArrayList<>();
 
     public Product(String name, int price) {
         this.name = name;
@@ -17,17 +17,17 @@ public class Product {
         return name;
     }
 
-    public List<Promotion> getPromotions() {
-        return promotions;
+    public List<Stock> getStocks() {
+        return stocks;
     }
 
-    public void addPromotion(Promotion promotion) {
-        promotions.add(promotion);
+    public void addStock(Stock stock) {
+        stocks.add(stock);
     }
 
     public int getAllQuantityAboutProduct() {
-        return promotions.stream()
-                .mapToInt(Promotion::getQuantity)
+        return stocks.stream()
+                .mapToInt(Stock::getQuantity)
                 .sum();
     }
 }

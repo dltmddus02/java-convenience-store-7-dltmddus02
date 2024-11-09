@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import store.domain.Product;
 import store.domain.ProductField;
-import store.domain.Promotion;
+import store.domain.Stock;
 import store.repository.ProductRepository;
 import store.view.output.OutputView;
 
@@ -26,7 +26,6 @@ public class ProductService {
     public void loadProductsFromFile() {
         try (BufferedReader br = new BufferedReader(new FileReader(PRODUCT_FILE_PATH))) {
             readProductLines(br);
-            System.out.println();
         } catch (IOException e) {
             System.err.println(FILE_LOAD_ERROR + ": " + e.getMessage());
         }
@@ -57,7 +56,7 @@ public class ProductService {
         OutputView.printProductList(productName, price, quantity, promotionType);
 
         Product product = getOrCreateProduct(productName, price);
-        addPromotionToProduct(product, quantity, promotionType);
+        addStockToProduct(product, quantity, promotionType);
         return product;
     }
 
@@ -66,14 +65,14 @@ public class ProductService {
                 .orElseGet(() -> new Product(productName, price));
     }
 
-    private void addPromotionToProduct(Product product, int quantity, String promotionType) {
-        Promotion promotion = new Promotion(quantity, promotionType);
-        product.addPromotion(promotion);
+    private void addStockToProduct(Product product, int quantity, String promotionType) {
+        Stock stock = new Stock(quantity, promotionType);
+        product.addStock(stock);
     }
 
     private void saveOrUpdateProduct(Product product) {
         if (!productRepository.existsByName(product.getName())) {
-            productRepository.save(product);
+            productRepository.saveProduct(product);
         }
     }
 
