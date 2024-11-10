@@ -12,15 +12,18 @@ import store.domain.Product;
 import store.domain.ProductField;
 import store.domain.Stock;
 import store.repository.ProductRepository;
+import store.repository.PromotionRepository;
 import store.view.output.OutputView;
 
 public class ProductService {
     private static final String PRODUCT_FILE_PATH = "src/main/resources/products.md";
     private static final String FILE_LOAD_ERROR = "상품 목록을 불러오는 중 오류가 발생했습니다.";
     private final ProductRepository productRepository;
+    private final PromotionRepository promotionRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, PromotionRepository promotionRepository) {
         this.productRepository = productRepository;
+        this.promotionRepository = promotionRepository;
     }
 
     public void loadProductsFromFile() {
@@ -66,7 +69,7 @@ public class ProductService {
     }
 
     private void addStockToProduct(Product product, int quantity, String promotionType) {
-        Stock stock = new Stock(quantity, promotionType);
+        Stock stock = new Stock(quantity, promotionType, promotionRepository);
         product.addStock(stock);
     }
 
