@@ -1,19 +1,20 @@
 package store.domain;
 
-import java.util.Map;
+import store.repository.PromotionRepository;
 
 public class Stock {
     private int quantity;
     private final String promotionType;
-//    private final Promotion promotionDetail;
+    private final Promotion promotion;
+    private final PromotionRepository promotionRepository;
 
-    public Stock(int quantity, String promotionType) {
+
+    public Stock(int quantity, String promotionType, PromotionRepository promotionRepository) {
         this.quantity = quantity;
         this.promotionType = promotionType;
-//        this.promotionDetail = getPromotionDetailByType(promotionType);
+        this.promotionRepository = promotionRepository;
+        this.promotion = findPromotionByType(promotionType);
     }
-
-    private static Map<String, Promotion> promotionDetailMap;
 
     public int getQuantity() {
         return quantity;
@@ -27,11 +28,11 @@ public class Stock {
         return promotionType;
     }
 
-//    private Promotion getPromotionDetailByType(String promotionType) {
-//        return promotionDetailMap.get(promotionType);
-//    }
-//
-//    public static void setPromotionDetailMap(Map<String, Promotion> detailsMap) {
-//        promotionDetailMap = detailsMap;
-//    }
+    public Promotion getPromotion() {
+        return promotion;
+    }
+
+    private Promotion findPromotionByType(String promotionType) {
+        return promotionRepository.findByType(promotionType).orElse(null);
+    }
 }
