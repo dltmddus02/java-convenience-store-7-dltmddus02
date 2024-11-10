@@ -8,4 +8,10 @@ public class InputView {
         InputValidator.validate(ProductNameAndQuantity);
         return ProductNameAndQuantity;
     }
+
+    public static String inputYesOrNo() {
+        String YesOrNo = Console.readLine();
+        InputValidator.validateYesOrNo(YesOrNo);
+        return YesOrNo;
+    }
 }
