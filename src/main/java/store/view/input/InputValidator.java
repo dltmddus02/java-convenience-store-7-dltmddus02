@@ -10,6 +10,11 @@ public class InputValidator {
         validateFormat(input);
     }
 
+    public static void validateYesOrNo(String input) {
+        validateNotNullOrEmpty(input);
+        validateInputIsYOrN(input);
+    }
+
     public static void validateNotNullOrEmpty(String input) {
         if (input == null || input.isBlank()) {
             throw new InputException(InputErrorMessage.INVALID_INPUT);
@@ -32,5 +37,11 @@ public class InputValidator {
         Pattern correctPattern = Pattern.compile("^" + repeatPattern + "$");
 
         return correctPattern.matcher(input).find();
+    }
+
+    private static void validateInputIsYOrN(String input) {
+        if (!input.equals("Y") && !input.equals("N")) {
+            throw new InputException(InputErrorMessage.INVALID_INPUT);
+        }
     }
 }
