@@ -2,10 +2,10 @@ package store.domain;
 
 public class Promotion {
     private final String promotionType;
-    private int buy;
-    private int get;
-    private String startDate;
-    private String endDate;
+    private final int buy;
+    private final int get;
+    private final String startDate;
+    private final String endDate;
 
     public Promotion(String promotionType, int buy, int get, String startDate, String endDate) {
         this.promotionType = promotionType;

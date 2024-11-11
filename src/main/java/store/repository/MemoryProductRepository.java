@@ -6,7 +6,7 @@ import java.util.Optional;
 import store.domain.Product;
 
 public class MemoryProductRepository implements ProductRepository {
-    private Map<String, Product> productCatalog = new HashMap<>();
+    private final Map<String, Product> productCatalog = new HashMap<>();
 
     @Override
     public void saveProduct(Product product) {
