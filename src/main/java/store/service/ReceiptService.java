@@ -14,7 +14,6 @@ public class ReceiptService {
     public ReceiptService(Receipt receipt) {
         receipt.setBeforeAmount();
         receipt.setEventDiscount();
-        receipt.setMembershipDiscount();
         receipt.setFinalAmount();
     }
 
