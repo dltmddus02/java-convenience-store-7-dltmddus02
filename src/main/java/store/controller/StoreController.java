@@ -35,7 +35,6 @@ public class StoreController {
         productService = new ProductService(productRepository, promotionRepository);
         productStockHandler = new ProductStockHandler(productRepository, productService, receipt);
         promotionService = new PromotionService(promotionRepository);
-//        receiptService = new ReceiptService(receipt);
 
         copyBackupFile();
     }
