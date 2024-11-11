@@ -1,13 +1,17 @@
 package store.service;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import store.domain.Product;
 import store.domain.ProductField;
 import store.domain.Stock;
@@ -17,7 +21,8 @@ import store.view.output.OutputView;
 
 public class ProductService {
     private static final String PRODUCT_FILE_PATH = "src/main/resources/products_backup.md";
-    private static final String FILE_LOAD_ERROR = "상품 목록을 불러오는 중 오류가 발생했습니다.";
+    private static final String FILE_LOAD_ERROR = "[ERROR] 상품 목록을 불러오는 중 오류가 발생했습니다.";
+    private static final String FILE_WRITE_ERROR = "[ERROR] 파일을 작성하는 중 오류가 발생했습니다.";
     private final ProductRepository productRepository;
     private final PromotionRepository promotionRepository;
 
@@ -27,13 +32,13 @@ public class ProductService {
     }
 
     public void loadProductsFromFile() {
+        addNullPromotionProducts();
         try (BufferedReader br = new BufferedReader(new FileReader(PRODUCT_FILE_PATH))) {
             readProductLines(br);
         } catch (IOException e) {
             System.err.println(FILE_LOAD_ERROR + ": " + e.getMessage());
         }
     }
-
 
     void readProductLines(BufferedReader br) throws IOException {
         br.readLine();
@@ -118,6 +123,59 @@ public class ProductService {
             for (String updatedLine : updatedLines) {
                 writer.write(updatedLine + System.lineSeparator());
             }
+        }
+    }
+
+    public void addNullPromotionProducts() {
+        try {
+            List<String> lines = readAllLines();
+            List<String> productLines = lines.subList(1, lines.size());
+            Set<String> productsWithoutPromotion = findProductsWithoutPromotion(productLines);
+
+            List<String> newLines = createNewLines(productLines, productsWithoutPromotion);
+
+            if (!newLines.isEmpty()) {
+                lines.addAll(newLines);
+                addLinesToFile(lines);
+            }
+        } catch (IOException e) {
+            System.err.println(FILE_LOAD_ERROR);
+        }
+    }
+
+    private Set<String> findProductsWithoutPromotion(List<String> productLines) {
+        Set<String> productsWithoutPromotion = new HashSet<>();
+        for (String line : productLines) {
+            String[] parts = line.split(",");
+            if ("null".equals(parts[ProductField.QUANTITY.getIndex()])) {
+                productsWithoutPromotion.add(parts[ProductField.NAME.getIndex()]);
+            }
+        }
+        return productsWithoutPromotion;
+    }
+
+    private List<String> createNewLines(List<String> productLines, Set<String> productsWithoutPromotion) {
+        List<String> linesToAdd = new ArrayList<>();
+        for (String line : productLines) {
+            String[] parts = line.split(",");
+            if (!"null".equals(parts[ProductField.QUANTITY.getIndex()]) && !productsWithoutPromotion.contains(
+                    parts[0])) {
+                linesToAdd.add(
+                        parts[ProductField.NAME.getIndex()] + "," + parts[ProductField.PRICE.getIndex()] + ",0,null");
+                productsWithoutPromotion.add(parts[ProductField.NAME.getIndex()]);
+            }
+        }
+        return linesToAdd;
+    }
+
+    private void addLinesToFile(List<String> lines) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PRODUCT_FILE_PATH))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println(FILE_WRITE_ERROR);
         }
     }
 
