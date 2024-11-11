@@ -17,6 +17,10 @@ public class Product {
         return name;
     }
 
+    public int getPrice() {
+        return price;
+    }
+
     public List<Stock> getStocks() {
         return stocks;
     }
