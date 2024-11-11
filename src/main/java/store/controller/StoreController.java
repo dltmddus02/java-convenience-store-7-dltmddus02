@@ -35,18 +35,16 @@ public class StoreController {
         productService = new ProductService(productRepository, promotionRepository);
         productStockHandler = new ProductStockHandler(productRepository, productService, receipt);
         promotionService = new PromotionService(promotionRepository);
-        receiptService = new ReceiptService();
+//        receiptService = new ReceiptService(receipt);
 
-        // 프로젝트 초기 실행 시 products.md를 products_backup.md로 복사
         copyBackupFile();
     }
 
     private void copyBackupFile() {
         try {
             Files.copy(Path.of(PRODUCT_FILE_PATH), Path.of(BACKUP_FILE_PATH), StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("초기 상품 목록을 불러왔습니다.");
         } catch (IOException e) {
-            System.err.println("파일 복사 중 오류가 발생했습니다: " + e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -60,12 +58,13 @@ public class StoreController {
                 System.out.println();
                 Map<String, Integer> productsMap = chooseProductAndQuantity();
                 if (updateStockOnFile(productsMap)) {
-                    if (askMembershipDiscount()) {
+                    if (InputView.askMembershipDiscount()) {
                         receipt.setMembershipDiscount();
                     }
+                    receiptService = new ReceiptService(receipt);
                     calculateTotalMoney();
 
-                    if (!askToContinueShopping()) {
+                    if (!InputView.askToContinueShopping()) {
                         break;
                     }
                     receipt = new Receipt();
@@ -112,33 +111,8 @@ public class StoreController {
         return isStockDeducted;
     }
 
-    private boolean askMembershipDiscount() {
-        System.out.println("멤버십 할인을 받으시겠습니까? (Y/N)");
-
-        String membershipDiscount;
-        try {
-            membershipDiscount = InputView.inputYesOrNo();
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return askToContinueShopping();
-        }
-        return membershipDiscount.equals("Y");
-    }
-
     private void calculateTotalMoney() {
         receiptService.printReceipt(receipt);
     }
 
-    private boolean askToContinueShopping() {
-        System.out.println("감사합니다. 구매하고 싶은 다른 상품이 있나요? (Y/N)");
-
-        String continueShopping;
-        try {
-            continueShopping = InputView.inputYesOrNo();
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return askToContinueShopping();
-        }
-        return continueShopping.equals("Y");
-    }
 }
