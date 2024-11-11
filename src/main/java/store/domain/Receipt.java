@@ -6,7 +6,6 @@ import store.dto.ReceiptItem;
 
 public class Receipt {
     private List<ReceiptItem> purchasedItems;
-    private List<ReceiptItem> promotionItems;
     private int beforeAmount;
     private int eventDiscount;
     private int membershipDiscount;
@@ -14,7 +13,6 @@ public class Receipt {
 
     public Receipt() {
         this.purchasedItems = new ArrayList<>();
-        this.promotionItems = new ArrayList<>();
         this.beforeAmount = 0;
         this.eventDiscount = 0;
         this.membershipDiscount = 0;
@@ -26,16 +24,10 @@ public class Receipt {
     }
 
     public void addPurchasedItem(String productName, int quantity, int amount) {
-        if (purchasedItems == null) {
-            purchasedItems = new ArrayList<>();
-        }
-        boolean isDuplicate = purchasedItems.stream()
-                .anyMatch(item -> item.getProductName().equals(productName));
-        if (isDuplicate) {
+        if (purchasedItems.stream().anyMatch(item -> item.getProductName().equals(productName))) {
             return;
         }
-        ReceiptItem item = new ReceiptItem(productName, quantity, amount);
-        purchasedItems.add(item);
+        purchasedItems.add(new ReceiptItem(productName, quantity, amount));
         calculateTotalAmount();
     }
 
@@ -68,11 +60,25 @@ public class Receipt {
         calculateTotalAmount();
     }
 
-    public void calculateEventDiscount() {
+    public int getTotalQuantity() {
+        return purchasedItems.stream()
+                .mapToInt(ReceiptItem::getQuantity)
+                .sum();
+    }
+
+    public int getEventDiscount() {
+//        calculateTotalEventDiscount();
+        return eventDiscount;
+    }
+
+    public void setEventDiscount() {
         eventDiscount = purchasedItems.stream()
                 .mapToInt(item -> item.getFreeQuantity() * item.getAmount())
                 .sum();
-        applyDiscounts();
+    }
+
+    public int getMembershipDiscount() {
+        return membershipDiscount;
     }
 
     public void setMembershipDiscount() {
@@ -87,57 +93,36 @@ public class Receipt {
         if (membershipDiscount >= 8000) {
             membershipDiscount = 8000;
         }
-        applyDiscounts();
     }
 
-    public int getMembershipDiscount() {
-        return membershipDiscount;
+    public void setFinalAmount() {
+        finalAmount = beforeAmount - eventDiscount - membershipDiscount;
     }
 
-
-    public void addMembershipDiscount(int discountAmount) {
-        membershipDiscount += discountAmount;
-        applyDiscounts();
+    public int getFinalAmount() {
+        return finalAmount;
     }
+
 
     private void calculateTotalAmount() {
         finalAmount = purchasedItems.stream()
                 .mapToInt(item -> item.getAmount() * (item.getQuantity()))
                 .sum();
+        applyDiscounts();
     }
 
     private void applyDiscounts() {
         finalAmount = beforeAmount - eventDiscount - membershipDiscount;
     }
 
-    public int getBeforeAmount() {
-        calculateTotalAmount();
-        return beforeAmount;
-    }
-
-    public int getEventDiscount() {
-        calculateEventDiscount();
-        return eventDiscount;
-    }
-
-
-    public int getTotalQuantity() {
-        return purchasedItems.stream()
-                .mapToInt(ReceiptItem::getQuantity)
-                .sum();
-    }
-
-    public int getTotalFreeQuantity() {
-        return purchasedItems.stream()
-                .mapToInt(ReceiptItem::getFreeQuantity)
-                .sum();
-    }
-
-
-    public int getTotalPurchaseAmount() {
-        return purchasedItems.stream()
+    public void setBeforeAmount() {
+        beforeAmount = purchasedItems.stream()
                 .mapToInt(item -> item.getAmount() * item.getQuantity())
                 .sum();
+    }
+
+    public int getBeforeAmount() {
+        return beforeAmount;
     }
 
 }
