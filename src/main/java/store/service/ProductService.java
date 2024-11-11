@@ -16,7 +16,7 @@ import store.repository.PromotionRepository;
 import store.view.output.OutputView;
 
 public class ProductService {
-    private static final String PRODUCT_FILE_PATH = "src/main/resources/products.md";
+    private static final String PRODUCT_FILE_PATH = "src/main/resources/products_backup.md";
     private static final String FILE_LOAD_ERROR = "상품 목록을 불러오는 중 오류가 발생했습니다.";
     private final ProductRepository productRepository;
     private final PromotionRepository promotionRepository;
