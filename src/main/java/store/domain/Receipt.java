@@ -78,14 +78,15 @@ public class Receipt {
     public void setMembershipDiscount() {
         int discountAmount = 0;
 
-//        if (applyDiscount) {
         discountAmount = purchasedItems.stream()
                 .filter(item -> item.getFreeQuantity() == 0)
                 .mapToInt(item -> item.getAmount() * item.getQuantity())
                 .sum();
-//        }
 
         membershipDiscount = (int) (discountAmount * 0.3);
+        if (membershipDiscount >= 8000) {
+            membershipDiscount = 8000;
+        }
         applyDiscounts();
     }
 
