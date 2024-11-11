@@ -63,7 +63,7 @@ class ApplicationTest extends NsTest {
 
     @DisplayName("프로모션 적용이 가능한 상품에 대해 고객이 해당 수량만큼 안 가져온 경우")
     @Test
-    void test() {
+    void askFreeProductOfferTest() {
         assertSimpleTest(() -> {
             run("[오렌지주스-3]", "Y", "N", "N");
             assertThat(output().contains("현재 오렌지주스은(는) 1개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)")).isTrue();
@@ -73,7 +73,7 @@ class ApplicationTest extends NsTest {
 
     @DisplayName("프로모션 재고가 부족하여 일부 수량을 프로모션 혜택 없이 결제해야 하는 경우")
     @Test
-    void test1() {
+    void askDiscountNotAppliedTest() {
         assertSimpleTest(() -> {
             run("[콜라-12]", "Y", "N", "N");
             assertThat(output().contains("현재 콜라 3개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)")).isTrue();
