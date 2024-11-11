@@ -1,5 +1,7 @@
 package store.service;
 
+import static store.view.input.exception.InputErrorMessage.STOCK_QUANTITY_NOT_FOUND;
+
 import camp.nextstep.edu.missionutils.DateTimes;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +44,7 @@ public class ProductStockHandler {
                 .orElseThrow(() -> new InputException(InputErrorMessage.NON_EXISTENT_PRODUCT));
 
         if (product.getAllQuantityAboutProduct() < requestedQuantity) {
-            throw new InputException(InputErrorMessage.STOCK_QUANTITY_NOT_FOUND);
+            throw new InputException(STOCK_QUANTITY_NOT_FOUND);
         }
         return product;
     }
@@ -112,6 +114,9 @@ public class ProductStockHandler {
     }
 
     private boolean isFreeProductOffer(Stock stock, int remainingQuantity, int requestedQuantity) {
+//        if(remainingQuantity<=requestedQuantity) {
+//            throw new InputException(STOCK_QUANTITY_NOT_FOUND.getMessage());
+//        }
         return remainingQuantity > requestedQuantity && requestedQuantity == stock.getPromotion().getBuy();
     }
 
@@ -129,7 +134,7 @@ public class ProductStockHandler {
     }
 
     private boolean isPromotionDiscountNotApplied(int remainingQuantity, int requestedQuantity) {
-        return remainingQuantity < requestedQuantity;
+        return remainingQuantity <= requestedQuantity;
     }
 
 
